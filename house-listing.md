@@ -10,7 +10,7 @@
 - **Living area:** [#] sq ft — compact, efficient open-flow layout
 - **Lot:** ~3,392 sq ft — **rear lot with private right-of-way access** (zoned ER-2)
 - **Year built:** [YEAR] — **fully renovated over the last 5 years**
-- **Address:** 18A India Street, Dartmouth, NS B3A 1A9 *(the home in the back — Google Maps imagery is out of date; there's now a large new deck and fence)*
+- **Location:** Central Dartmouth, near Wyse Road *(exact address shared with serious, screened buyers only)*
 - **Parking:** [e.g. driveway parking for # cars]
 
 ---
@@ -71,10 +71,12 @@ Dartmouth's shops and restaurants.
 ---
 
 ## Showings & Contact (For Sale By Owner)
-- **Shown by appointment** — [your name], owner
+- **Shown by appointment only** — [your name], owner
 - **Call / text:** [PHONE]
 - **Email:** [EMAIL]
 - Co-owned and sold by owners; serious inquiries welcome.
+- **Address given to screened buyers only.** Please call or text first — happy
+  to answer questions and book a viewing for serious buyers.
 
 ---
 
@@ -106,3 +108,30 @@ note ready removes the #1 objection and keeps your sale from stalling.
 Many Dartmouth buyers come through a buyer's agent. You can still sell FSBO and
 simply offer to pay a buyer-agent commission (e.g. 2.5%) — it widens your pool
 a lot while you still save the listing-side commission. Your call.
+
+---
+
+## ✅ READY-TO-POST SHORT VERSION (Facebook Marketplace / Kijiji)
+*Copy/paste. Address kept private — screen callers first.*
+
+**$379,900 — Renovated 1-Bed Detached Home, Central Dartmouth (For Sale By Owner)**
+
+Own a fully renovated detached home — not a condo, no monthly fees — steps from
+Dartmouth's booming new-downtown (Wyse Rd). Private spot set back off the street
+with its own access, a big new deck and new fence.
+
+Renovated top to bottom in the last 5 years: **new roof, siding, plumbing,
+electrical, walls, driveway, deck & fence.** Move-in ready, nothing left to fix.
+
+Perfect for a first-time buyer, investor, or anyone who wants to own instead of
+rent in one of Dartmouth's fastest-growing areas.
+
+📍 Central Dartmouth, near Wyse Rd *(exact address shared with serious buyers)*
+🛏️ 1 bed · 🛁 1 bath · cozy & efficient
+📞 Call/text [YOUR NAME] at [YOUR PHONE] — shown by appointment. Sold by owners.
+
+### Safety while selling FSBO
+- Never give the address until you've talked to the person and you're satisfied.
+- Don't show the home alone — have your mom or a friend there for every viewing.
+- Take a name and phone number before booking; trust your gut on no-shows/odd messages.
+- Don't accept e-transfers/deposits without your lawyer involved.

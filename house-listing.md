@@ -1,4 +1,4 @@
-# Private, Fully Renovated Home Off the Street — Dartmouth, NS (FSBO)
+# Renovated Detached Home in Dartmouth's "New Downtown" — Private & Off the Street (FSBO)
 
 > Fill the **[BRACKETED]** blanks, delete this line, and it's ready to post.
 
@@ -40,6 +40,15 @@ big-ticket repairs that come with most homes this age.
 **[Add 2–3 sentences here that only you can write — what's it like to live
 there? Sunlight, the deck in the evening, the quiet, walkable to ___,
 the kitchen, etc. This is what makes buyers reach out.]**
+
+### Location upside — Dartmouth's "new downtown"
+You're steps from the Wyse Road corridor, the area the city is transforming
+into Dartmouth's new downtown — multiple residential towers are approved or
+proposed nearby (including high-rises near the Macdonald Bridge and behind the
+DoubleTree). Buying here means getting in ahead of major investment in the
+neighbourhood, while still owning a private, detached, renovated home rather
+than a condo. Walkable to the harbour, the bridge to Halifax, and downtown
+Dartmouth's shops and restaurants.
 
 > 📸 **Note for buyers:** Google Street View / satellite imagery is out of
 > date — it doesn't show the new deck and fence. Photos in this listing are current.

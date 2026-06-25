@@ -6,8 +6,8 @@
 
 ## Quick Facts
 - **Price:** $[ASKING PRICE]
-- **Beds / Baths:** [#] bed / [#] bath
-- **Living area:** [#] sq ft
+- **Beds / Baths:** 1 bed / 1 bath
+- **Living area:** [#] sq ft — compact, efficient open-flow layout
 - **Lot:** ~3,392 sq ft — **rear lot with private right-of-way access** (zoned ER-2)
 - **Year built:** [YEAR] — **fully renovated over the last 5 years**
 - **Address:** 18A India Street, Dartmouth, NS B3A 1A9 *(the home in the back — Google Maps imagery is out of date; there's now a large new deck and fence)*
@@ -36,6 +36,16 @@ isn't lipstick — it's the expensive, behind-the-walls work already done for yo
 
 Move-in ready with the major systems modernized, so you're not facing the
 big-ticket repairs that come with most homes this age.
+
+**Smart, efficient layout:** a cozy one-bedroom with an easy open flow —
+front entrance into the kitchen, through to the bedroom, and a bonus
+office/hangout space connecting to the bathroom. Everything you need, nothing
+you don't, and far less to clean, heat and maintain than a big house.
+
+**Perfect for:** a first-time buyer who wants to *own* instead of rent · an
+investor looking for a detached rental steps from the new-downtown towers · a
+single professional or downsizer who wants walkable, low-maintenance living.
+A detached home you own — not a condo with monthly fees.
 
 **[Add 2–3 sentences here that only you can write — what's it like to live
 there? Sunlight, the deck in the evening, the quiet, walkable to ___,

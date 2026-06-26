@@ -71,7 +71,7 @@ Dartmouth's shops and restaurants.
 ---
 
 ## Showings & Contact (For Sale By Owner)
-- **Shown by appointment only** — [your name], owner
+- **Shown by appointment only** — Owner
 - **Call / text:** [PHONE]
 - **Email:** [EMAIL]
 - Co-owned and sold by owners; serious inquiries welcome.

@@ -5,7 +5,7 @@
 ---
 
 ## Quick Facts
-- **Price:** $399,900 *(your call — change here; $379,900 = sells faster)*
+- **Price:** $555,555
 - **Beds / Baths:** 1 bed / 1 bath
 - **Living area:** [#] sq ft — compact, efficient open-flow layout
 - **Lot:** ~3,392 sq ft — **rear lot with private right-of-way access** (zoned ER-2)
@@ -114,7 +114,7 @@ a lot while you still save the listing-side commission. Your call.
 ## ✅ READY-TO-POST SHORT VERSION (Facebook Marketplace / Kijiji)
 *Copy/paste. Address kept private — screen callers first.*
 
-**$399,900 — Renovated 1-Bed Detached Home, Central Dartmouth (For Sale By Owner)**
+**$555,555 — Renovated 1-Bed Detached Home, Central Dartmouth (For Sale By Owner)**
 
 Own a fully renovated detached home — not a condo, no monthly fees — steps from
 Dartmouth's booming new-downtown (Wyse Rd). Private spot set back off the street

@@ -55,6 +55,19 @@ waiting for the right buyer AND the right fixer.
 
 ---
 
+## Optional: automated Kijiji watcher (`fixer_watch.py`)
+A companion script in this repo polls Kijiji's NS + NB "houses for sale" for your
+keywords and **emails you only the new matches**. It's for the FSBO/private side
+(Kijiji) — the MLS saved-search alerts above stay your primary net.
+
+- Runs on **your own always-on machine** (home PC, Raspberry Pi, cheap VPS) — not
+  a temporary cloud box, or it'll stop when that box shuts off.
+- Setup + scheduling instructions are in the script's header comment.
+- Quick check it works:  `python3 fixer_watch.py --self-test`
+- See matches without emailing:  `python3 fixer_watch.py --dry-run`
+- Web scraping is brittle by nature — if Kijiji changes its layout the parser may
+  need a small tweak. The email alerts don't have that problem.
+
 ## Notes / candidates (jot finds here)
 - [address] — $[price] — [why it's interesting / concerns]
 - ...

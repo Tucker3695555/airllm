@@ -2,6 +2,8 @@
 
 A small Express server that receives task dispatches over HTTP and appends them to a local queue file (`dispatch-queue.jsonl`), one JSON object per line. Downstream tooling (Cursor, a watcher script, etc.) can tail or consume that file.
 
+It also serves a **command dashboard** at `http://localhost:3000/` — stat tiles (queue size, project count, last dispatch time), a form to submit new dispatches, a live server-health indicator, and an auto-refreshing table of the queue. Supports light and dark mode.
+
 ## Setup
 
 ```bash
@@ -37,6 +39,14 @@ Each accepted dispatch is appended to the queue file as:
 
 ```json
 { "task": "refactor auth module", "project": "airllm", "receivedAt": "2026-07-03T00:00:00.000Z" }
+```
+
+### `GET /queue`
+
+Returns all queued dispatches:
+
+```json
+{ "status": "ok", "entries": [ { "task": "...", "project": "...", "receivedAt": "..." } ] }
 ```
 
 ### `GET /health`

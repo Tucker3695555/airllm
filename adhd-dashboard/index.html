@@ -1,0 +1,1209 @@
+<title>ADHD Master Dashboard</title>
+<style>
+  :root {
+    --bg: #F2F5F7;
+    --surface: #FFFFFF;
+    --surface-2: #E9EEF2;
+    --ink: #1C2733;
+    --ink-soft: #5A6B7C;
+    --line: #D9E1E8;
+    --accent: #E8890C;
+    --accent-deep: #C97207;
+    --accent-contrast: #201203;
+    --accent-soft: rgba(232, 137, 12, 0.10);
+    --good: #2E9E6B;
+    --good-soft: rgba(46, 158, 107, 0.12);
+    --bad: #C4554D;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(28, 39, 51, 0.05), 0 10px 28px rgba(28, 39, 51, 0.07);
+    --f-display: ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --f-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121821;
+      --surface: #1A2230;
+      --surface-2: #242F3E;
+      --ink: #E9EEF4;
+      --ink-soft: #92A3B5;
+      --line: #2C3949;
+      --accent: #FFAB3D;
+      --accent-deep: #F59A22;
+      --accent-contrast: #221503;
+      --accent-soft: rgba(255, 171, 61, 0.12);
+      --good: #4CC08F;
+      --good-soft: rgba(76, 192, 143, 0.14);
+      --bad: #E07B72;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F2F5F7;
+    --surface: #FFFFFF;
+    --surface-2: #E9EEF2;
+    --ink: #1C2733;
+    --ink-soft: #5A6B7C;
+    --line: #D9E1E8;
+    --accent: #E8890C;
+    --accent-deep: #C97207;
+    --accent-contrast: #201203;
+    --accent-soft: rgba(232, 137, 12, 0.10);
+    --good: #2E9E6B;
+    --good-soft: rgba(46, 158, 107, 0.12);
+    --bad: #C4554D;
+    --shadow: 0 1px 2px rgba(28, 39, 51, 0.05), 0 10px 28px rgba(28, 39, 51, 0.07);
+  }
+  :root[data-theme="dark"] {
+    --bg: #121821;
+    --surface: #1A2230;
+    --surface-2: #242F3E;
+    --ink: #E9EEF4;
+    --ink-soft: #92A3B5;
+    --line: #2C3949;
+    --accent: #FFAB3D;
+    --accent-deep: #F59A22;
+    --accent-contrast: #221503;
+    --accent-soft: rgba(255, 171, 61, 0.12);
+    --good: #4CC08F;
+    --good-soft: rgba(76, 192, 143, 0.14);
+    --bad: #E07B72;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 18px 14px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 4px;
+  }
+  .day {
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+  }
+  .tally {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 12px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .tally b { color: var(--good); }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .zone-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+
+  /* ---------- NOW card ---------- */
+  #now-card {
+    background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 20px 18px 18px;
+  }
+  #now-card .zone-label { color: var(--accent-deep); }
+  :root[data-theme="dark"] #now-card .zone-label { color: var(--accent); }
+  @media (prefers-color-scheme: dark) { #now-card .zone-label { color: var(--accent); } }
+  :root[data-theme="light"] #now-card .zone-label { color: var(--accent-deep); }
+
+  .now-task {
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: clamp(1.6rem, 6.5vw, 2.4rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+    overflow-wrap: anywhere;
+  }
+  .timer-digits {
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: clamp(2.8rem, 14vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    margin: 4px 0 10px;
+  }
+  .timer-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .timer-bar > div {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.5s linear;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .hint { font-size: 0.85rem; color: var(--ink-soft); margin: 8px 0 0; }
+
+  /* ---------- buttons & inputs ---------- */
+  button {
+    font-family: var(--f-body);
+    font-size: 0.9rem;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    border-radius: 11px;
+    padding: 9px 14px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--ink-soft); }
+  button:focus-visible, input:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
+  .btn-primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
+  .btn-ghost:hover { border-color: var(--line); }
+  .icon-btn {
+    width: 34px; height: 34px;
+    padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+    flex: none;
+  }
+  input[type="text"] {
+    font-family: var(--f-body);
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 11px 13px;
+    width: 100%;
+    min-width: 0;
+  }
+  input[type="text"]::placeholder { color: var(--ink-soft); opacity: 0.8; }
+  .input-row { display: flex; gap: 8px; }
+  .input-row input { flex: 1; }
+
+  /* ---------- lists ---------- */
+  ul.plain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: 11px;
+    padding: 8px 8px 8px 12px;
+  }
+  .item .txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .item.done .txt { text-decoration: line-through; color: var(--ink-soft); }
+  .slot-num {
+    flex: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 0.75rem; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .item.done .slot-num { background: var(--good-soft); border-color: transparent; color: var(--good); }
+  .carried {
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 1px 7px;
+    flex: none;
+  }
+  .empty-slot {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--ink-soft);
+    border: 1px dashed var(--line);
+    border-radius: 11px;
+    padding: 8px 12px;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  .empty-note { color: var(--ink-soft); font-size: 0.88rem; margin: 2px 0 0; }
+
+  /* ---------- wins ---------- */
+  #wins .item { background: var(--good-soft); border-color: transparent; padding: 7px 12px; }
+  #wins .when { flex: none; font-size: 0.75rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .win-check { color: var(--good); flex: none; font-weight: 700; }
+
+  /* ---------- drawers ---------- */
+  details.card { padding: 0; overflow: hidden; }
+  details.card summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 0.95rem;
+  }
+  details.card summary::-webkit-details-marker { display: none; }
+  details.card summary .chev { color: var(--ink-soft); transition: transform 0.15s; flex: none; }
+  details[open].card summary .chev { transform: rotate(90deg); }
+  details.card summary .count {
+    margin-left: auto;
+    font-size: 0.75rem; color: var(--ink-soft);
+    background: var(--surface-2);
+    border-radius: 999px; padding: 3px 10px;
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+  .drawer-body { padding: 2px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .check-row { display: flex; gap: 10px; align-items: flex-start; font-size: 0.92rem; }
+  .check-row input[type="checkbox"] {
+    width: 18px; height: 18px; margin-top: 2px; flex: none;
+    accent-color: var(--good);
+  }
+  .check-row.checked label { color: var(--ink-soft); text-decoration: line-through; }
+  .check-row a { color: var(--accent-deep); font-weight: 600; text-decoration: none; }
+  .check-row a:hover { text-decoration: underline; }
+  @media (prefers-color-scheme: dark) { .check-row a { color: var(--accent); } }
+  :root[data-theme="dark"] .check-row a { color: var(--accent); }
+  :root[data-theme="light"] .check-row a { color: var(--accent-deep); }
+  .fine-print { font-size: 0.8rem; color: var(--ink-soft); margin: 6px 0 0; }
+
+  /* ---------- toast ---------- */
+  #toast {
+    position: fixed;
+    left: 50%; bottom: 22px;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    max-width: 90vw;
+    text-align: center;
+    pointer-events: none;
+    z-index: 50;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .pulse { animation: pulse 0.35s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse { animation: none; }
+    #toast { transition: opacity 0.25s ease; }
+    details.card summary .chev { transition: none; }
+    .timer-bar > div { transition: none; }
+  }
+
+  footer {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    padding-top: 8px;
+  }
+</style>
+
+<main>
+  <header>
+    <div class="day" id="day-line">Today</div>
+    <div class="tally" id="tally"><b>0</b> wins all-time</div>
+  </header>
+
+  <!-- FIRST-TIME SETUP STRIP (auto-hides once done) -->
+  <section class="card" id="setup-strip" hidden>
+    <p class="zone-label">First-time setup — this box disappears when it's done</p>
+    <div class="row" id="strip-actions"></div>
+    <p class="hint" id="strip-desktop"></p>
+  </section>
+
+  <!-- RIGHT NOW -->
+  <section class="card" id="now-card" aria-labelledby="now-label">
+    <p class="zone-label" id="now-label">Right now — one thing only</p>
+    <div id="now-body"></div>
+  </section>
+
+  <!-- TOP 3 -->
+  <section class="card" aria-labelledby="top3-label">
+    <p class="zone-label" id="top3-label">Today's top 3 — three is the limit</p>
+    <ul class="plain" id="top3-list"></ul>
+  </section>
+
+  <!-- BRAIN DUMP -->
+  <section class="card" aria-labelledby="dump-label">
+    <p class="zone-label" id="dump-label">Brain dump — get it out of your head</p>
+    <div class="input-row">
+      <input type="text" id="dump-input" placeholder="Type it, press Enter, forget it" aria-label="Brain dump entry" />
+      <button class="icon-btn" id="dump-add" title="Add to brain dump" aria-label="Add to brain dump">＋</button>
+    </div>
+    <ul class="plain" id="dump-list" style="margin-top:10px;"></ul>
+    <p class="empty-note" id="dump-empty">Empty head, happy head.</p>
+  </section>
+
+  <!-- WINS -->
+  <section class="card" id="wins" aria-labelledby="wins-label">
+    <p class="zone-label" id="wins-label">Wins today — small counts</p>
+    <ul class="plain" id="wins-list"></ul>
+    <p class="empty-note" id="wins-empty">The first win of the day is waiting.</p>
+    <div class="row" style="margin-top:10px;">
+      <button class="btn-ghost" id="win-add">＋ log a win</button>
+    </div>
+  </section>
+
+  <!-- MONEY HUNT -->
+  <details class="card" id="money-drawer">
+    <summary><span class="chev">▸</span> 💰 Lost money hunt <span class="count" id="money-count">0/11</span></summary>
+    <div class="drawer-body" id="money-body">
+      <p class="fine-print" style="margin:0;">Free, official searches first — about an hour of clicking total. Check each one off as you do it.</p>
+    </div>
+  </details>
+
+  <!-- SETUP -->
+  <details class="card" id="setup-drawer">
+    <summary><span class="chev">▸</span> 🛠️ Get set up with Claude <span class="count" id="setup-count">0/4</span></summary>
+    <div class="drawer-body" id="setup-body"></div>
+  </details>
+
+  <!-- DESKTOP APP -->
+  <details class="card">
+    <summary><span class="chev">▸</span> 📌 Make it a desktop app</summary>
+    <div class="drawer-body">
+      <p style="margin:0;"><b>Chrome:</b> ⋮ menu → <b>“Install page as app”</b> (on some versions it's under “Cast, save, and share”, or “Save and share → Create shortcut” with “Open as window” ticked).</p>
+      <p style="margin:0;"><b>Edge:</b> ⋯ menu → <b>Apps</b> → <b>“Install this site as an app”</b>.</p>
+      <p style="margin:0;"><b>Safari (Mac):</b> File menu → <b>“Add to Dock…”</b>.</p>
+      <p style="margin:0;"><b>Phone:</b> Share button → <b>“Add to Home Screen”</b>.</p>
+      <p class="fine-print">You get a real icon that opens the dashboard in its own window — no tabs to lose. Updates Claude ships arrive automatically the next time you open it.</p>
+    </div>
+  </details>
+
+  <!-- DATA -->
+  <details class="card" id="data-drawer">
+    <summary><span class="chev">▸</span> 💾 Hard saves &amp; backups <span class="count" id="data-status-chip">browser</span></summary>
+    <div class="drawer-body">
+      <p style="margin:0;" id="data-status-line">Saving automatically in this browser.</p>
+      <div class="row">
+        <button id="connect-file" hidden>Connect a save file</button>
+        <button id="reconnect-file" hidden>Reconnect save file</button>
+        <button id="backup-btn">Download backup</button>
+        <button class="btn-ghost" id="restore-btn">Restore from backup</button>
+      </div>
+      <p class="fine-print">“Connect a save file” (Chrome/Edge) writes every change to a real file on your computer — pick a spot once, like Documents, and it saves silently from then on. “Download backup” works in every browser; the file is tiny, grab one whenever.</p>
+      <input type="file" id="restore-input" accept=".json,application/json" hidden />
+    </div>
+  </details>
+
+  <!-- HOW IT WORKS -->
+  <details class="card">
+    <summary><span class="chev">▸</span> 🧭 How this works</summary>
+    <div class="drawer-body">
+      <p style="margin:0;">The loop is simple, and it's the whole system:</p>
+      <p style="margin:0;"><b>1. Dump</b> every stray thought into Brain dump the second it appears — that's how you protect your focus.</p>
+      <p style="margin:0;"><b>2. Pick</b> at most three things that matter today.</p>
+      <p style="margin:0;"><b>3. Focus</b> on exactly one, with a timer. Can't start? Use the 10-minute button — starting is the hard part, not finishing.</p>
+      <p style="margin:0;"><b>4. Win.</b> Hit Done and let the list grow. Momentum beats motivation.</p>
+      <p class="fine-print">Unfinished priorities carry over to tomorrow automatically — no shame, they just show a "carried" tag. Everything saves by itself in this browser, and your entries never leave your device.</p>
+    </div>
+  </details>
+
+  <footer>Private to you · <span id="save-status">saves automatically</span> · v2 · built by Claude — ask for changes anytime</footer>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var KEY = "adhd_dash_v1";
+
+  var MONEY = [
+    { t: "Search <a href='https://missingmoney.com' target='_blank' rel='noopener'>MissingMoney.com</a> — most states' unclaimed property at once" },
+    { t: "Search your own state's unclaimed property site (google your state + \"unclaimed property\", use the .gov result)" },
+    { t: "Check <a href='https://treasuryhunt.gov' target='_blank' rel='noopener'>TreasuryHunt.gov</a> for matured savings bonds" },
+    { t: "Run the <a href='https://askebsa.dol.gov/abandonedplansearch/' target='_blank' rel='noopener'>Dept. of Labor search</a> for old 401(k)s from past jobs" },
+    { t: "Check <a href='https://www.irs.gov/refunds' target='_blank' rel='noopener'>IRS Where's My Refund</a> for a refund that never arrived" },
+    { t: "Search your email for \"gift card\", \"e-gift\", and \"store credit\"" },
+    { t: "Check old PayPal / Venmo / Cash App balances" },
+    { t: "List any bank accounts you stopped using — call and ask for the balance" },
+    { t: "Search your email for \"settlement\" (class actions owe people money constantly)" },
+    { t: "Pull 3 months of bank statements and circle every subscription — cancel the forgotten ones" },
+    { t: "Round up old crypto: wallet apps, exchange logins, seed phrases in notebooks" }
+  ];
+
+  var SETUP = [
+    { t: "Create your real repo: go to <a href='https://github.com/new' target='_blank' rel='noopener'>github.com/new</a>, name it <b>second-brain</b>, choose <b>Private</b>, click Create" },
+    { t: "Unzip the starter vault Claude sent you, open Obsidian, choose \"Open folder as vault\", pick the starter-vault folder" },
+    { t: "Install the Claude desktop app on your computer — <a href='https://claude.ai/download' target='_blank' rel='noopener'>claude.ai/download</a> — so we can do the computer cleanup and money-file hunt there" },
+    { t: "Come back to Claude and say \"the repo's ready\" — I'll move this dashboard's code into its real home" }
+  ];
+
+  /* ---------- state ---------- */
+
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  }
+
+  function freshState() {
+    return {
+      date: todayStr(),
+      now: null,            // { text, fromTop3 (index or -1) }
+      timer: null,          // { total, endsAt, paused, left }
+      top3: [],             // [{ text, done, carried }]
+      dump: [],             // [{ text }]
+      winsToday: [],        // [{ text, at: "3:42 PM" }]
+      winsTotal: 0,
+      checks: { money: {}, setup: {} },
+      stripDismissed: false,
+      updatedAt: 0
+    };
+  }
+
+  var state = freshState();
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var saved = JSON.parse(raw);
+      for (var k in state) { if (Object.prototype.hasOwnProperty.call(saved, k)) state[k] = saved[k]; }
+    }
+  } catch (e) { /* start fresh if storage is unreadable */ }
+
+  // day rollover: carry unfinished priorities, bank the wins, clear focus
+  function rolloverIfNeeded() {
+    if (state.date === todayStr()) return;
+    state.winsTotal += state.winsToday.length;
+    state.winsToday = [];
+    state.top3 = state.top3.filter(function (t) { return !t.done; });
+    state.top3.forEach(function (t) { t.carried = true; });
+    state.now = null;
+    state.timer = null;
+    state.date = todayStr();
+    save();
+    setTimeout(function () {
+      toast(state.top3.length
+        ? "Fresh day. Unfinished priorities carried over — no shame."
+        : "Fresh day. What are today's top 3?");
+    }, 400);
+  }
+  rolloverIfNeeded();
+
+  /* ---------- saving: three layers ----------
+     1. localStorage  — instant, every change
+     2. IndexedDB     — second browser copy, harder to lose
+     3. a real file   — optional, Chrome/Edge, auto-written on every change */
+
+  var fileHandle = null;
+  var mirrorTimer = null;
+
+  function save() {
+    state.updatedAt = Date.now();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage full/blocked */ }
+    clearTimeout(mirrorTimer);
+    mirrorTimer = setTimeout(mirror, 800);
+    updateSaveStatus();
+  }
+
+  function idb() {
+    return new Promise(function (res, rej) {
+      var rq = indexedDB.open("adhd_dash", 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore("kv"); };
+      rq.onsuccess = function () { res(rq.result); };
+      rq.onerror = function () { rej(rq.error); };
+    });
+  }
+  function idbSet(k, v) {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("kv", "readwrite");
+        tx.objectStore("kv").put(v, k);
+        tx.oncomplete = res;
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbGet(k) {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var rq = db.transaction("kv").objectStore("kv").get(k);
+        rq.onsuccess = function () { res(rq.result); };
+        rq.onerror = function () { rej(rq.error); };
+      });
+    });
+  }
+
+  function mirror() {
+    try { idbSet("state", JSON.parse(JSON.stringify(state))).catch(function () {}); } catch (e) {}
+    if (fileHandle) writeToFile();
+  }
+
+  function writeToFile() {
+    fileHandle.createWritable().then(function (w) {
+      return w.write(JSON.stringify(state, null, 2)).then(function () { return w.close(); });
+    }).then(function () { updateSaveStatus(); }).catch(function () { /* browser copies still hold it */ });
+  }
+
+  function connectFile() {
+    window.showSaveFilePicker({
+      suggestedName: "adhd-dashboard-data.json",
+      types: [{ description: "Dashboard data", accept: { "application/json": [".json"] } }]
+    }).then(function (h) {
+      fileHandle = h;
+      idbSet("fileHandle", h).catch(function () {});
+      writeToFile();
+      renderDataButtons();
+      updateSaveStatus();
+      toast("Connected. Every change now auto-saves to that file.");
+    }).catch(function (e) {
+      if (e && e.name === "AbortError") return;
+      toast("File picker was blocked here — Download backup works everywhere.");
+    });
+  }
+
+  function reconnectFile() {
+    idbGet("fileHandle").then(function (h) {
+      if (!h) return;
+      return h.requestPermission({ mode: "readwrite" }).then(function (p) {
+        if (p !== "granted") return;
+        fileHandle = h;
+        return adoptNewer(h).then(function () {
+          renderDataButtons();
+          updateSaveStatus();
+          toast("Save file reconnected.");
+        });
+      });
+    }).catch(function () {});
+  }
+
+  function adoptNewer(h) {
+    return h.getFile().then(function (f) { return f.text(); }).then(function (txt) {
+      var data = JSON.parse(txt);
+      if (data && typeof data === "object" && (data.updatedAt || 0) > (state.updatedAt || 0)) {
+        applyState(data);
+        rolloverIfNeeded();
+        rerenderAll();
+        toast("Loaded your latest data from the save file.");
+      }
+    }).catch(function () {});
+  }
+
+  function applyState(saved) {
+    var base = freshState();
+    for (var k in base) { if (Object.prototype.hasOwnProperty.call(saved, k)) base[k] = saved[k]; }
+    state = base;
+    save();
+  }
+
+  function downloadBackup() {
+    var d = new Date();
+    var name = "adhd-dashboard-backup-" + d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + ".json";
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    toast("Backup downloaded. Tiny file, big safety.");
+  }
+
+  function updateSaveStatus() {
+    var where = fileHandle ? "file + browser" : "browser";
+    var line = $("save-status");
+    if (line) line.textContent = "saved ✓ " + timeNow() + " (" + where + ")";
+    var chip = $("data-status-chip");
+    if (chip) chip.textContent = where;
+    var dl = $("data-status-line");
+    if (dl) dl.textContent = fileHandle
+      ? "Auto-saving to your file and this browser. Belt and suspenders."
+      : "Saving automatically in this browser. Connect a file for a hard copy on disk.";
+  }
+
+  function rerenderAll() {
+    renderHeader();
+    renderNow();
+    renderTop3();
+    renderDump();
+    renderWins();
+    renderChecklist(MONEY, "money-body", "money-count", "money");
+    renderChecklist(SETUP, "setup-body", "setup-count", "setup");
+    renderSetupStrip();
+  }
+
+  function browserTip() {
+    var ua = navigator.userAgent;
+    if (/Edg\//.test(ua)) return "Edge: ⋯ menu → Apps → “Install this site as an app”.";
+    if (/Chrome/.test(ua)) return "Chrome: ⋮ menu (top-right) → “Install page as app” (on some versions: “Save and share → Create shortcut”, tick “Open as window”).";
+    if (/Safari/.test(ua)) return "Safari: File menu → “Add to Dock…” (on iPhone: Share → “Add to Home Screen”).";
+    return "Open the 📌 drawer below for install steps.";
+  }
+
+  function renderSetupStrip() {
+    var strip = $("setup-strip");
+    if (!strip) return;
+    var needSaves = FS_OK && !fileHandle;
+    var needDesktop = !IS_APP;
+    if (state.stripDismissed || (!needSaves && !needDesktop)) { strip.hidden = true; return; }
+    strip.hidden = false;
+    var actions = $("strip-actions");
+    actions.innerHTML = "";
+    if (needSaves) {
+      var b = el("button", "btn-primary", "💾 Turn on hard saves — one tap");
+      b.addEventListener("click", connectFile);
+      actions.appendChild(b);
+    }
+    var x = el("button", "btn-ghost", "✕ hide this");
+    x.addEventListener("click", function () {
+      state.stripDismissed = true;
+      save();
+      renderSetupStrip();
+    });
+    actions.appendChild(x);
+    $("strip-desktop").textContent = needDesktop
+      ? "📌 To make this a desktop app — " + browserTip()
+      : "";
+  }
+
+  /* ---------- helpers ---------- */
+
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function timeNow() {
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes();
+    var ap = h >= 12 ? "pm" : "am";
+    h = h % 12; if (h === 0) h = 12;
+    return h + ":" + (m < 10 ? "0" : "") + m + ap;
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 3200);
+  }
+
+  function pulse(node) {
+    node.classList.remove("pulse");
+    void node.offsetWidth;
+    node.classList.add("pulse");
+  }
+
+  function chime() {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      var ctx = new Ctx();
+      [523.25, 783.99].forEach(function (freq, i) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = "sine"; o.frequency.value = freq;
+        o.connect(g); g.connect(ctx.destination);
+        var t0 = ctx.currentTime + i * 0.18;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5);
+        o.start(t0); o.stop(t0 + 0.55);
+      });
+    } catch (e) { /* sound is a bonus, not a requirement */ }
+  }
+
+  function recordWin(text) {
+    state.winsToday.push({ text: text, at: timeNow() });
+    save();
+    renderWins();
+    renderHeader();
+    pulse($("wins"));
+  }
+
+  /* ---------- header ---------- */
+
+  function renderHeader() {
+    var d = new Date();
+    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    $("day-line").textContent = days[d.getDay()] + " · " + months[d.getMonth()] + " " + d.getDate();
+    var total = state.winsTotal + state.winsToday.length;
+    var tally = $("tally");
+    tally.innerHTML = "";
+    var b = el("b", null, String(total));
+    tally.appendChild(b);
+    tally.appendChild(document.createTextNode(" wins all-time"));
+  }
+
+  /* ---------- NOW card ---------- */
+
+  var tickHandle = null;
+
+  function startTimer(minutes) {
+    var secs = minutes * 60;
+    state.timer = { total: secs, endsAt: Date.now() + secs * 1000, paused: false, left: secs };
+    save();
+    renderNow();
+  }
+
+  function timerLeft() {
+    if (!state.timer) return 0;
+    if (state.timer.paused) return state.timer.left;
+    return Math.max(0, Math.round((state.timer.endsAt - Date.now()) / 1000));
+  }
+
+  function fmt(secs) {
+    var m = Math.floor(secs / 60), s = secs % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function tick() {
+    if (!state.timer) return;
+    var left = timerLeft();
+    var digits = $("timer-digits");
+    var bar = $("timer-fill");
+    if (digits) digits.textContent = fmt(left);
+    if (bar) bar.style.width = (100 * (1 - left / state.timer.total)) + "%";
+    document.title = state.now ? fmt(left) + " · " + state.now.text : "ADHD Master Dashboard";
+    if (left <= 0 && !state.timer.paused) {
+      state.timer = null;
+      save();
+      chime();
+      toast("Time! Stand up, shake it off — then hit Done or go again.");
+      renderNow();
+    }
+  }
+
+  function renderNow() {
+    clearInterval(tickHandle);
+    document.title = "ADHD Master Dashboard";
+    var body = $("now-body");
+    body.innerHTML = "";
+
+    if (!state.now) {
+      var row = el("div", "input-row");
+      var input = el("input");
+      input.type = "text";
+      input.id = "now-input";
+      input.placeholder = "What's the one thing?";
+      input.setAttribute("aria-label", "Set current focus");
+      var go = el("button", "btn-primary", "Focus");
+      go.addEventListener("click", setNowFromInput);
+      input.addEventListener("keydown", function (e) { if (e.key === "Enter") setNowFromInput(); });
+      row.appendChild(input);
+      row.appendChild(go);
+      body.appendChild(row);
+      body.appendChild(el("p", "hint", "…or press ▶ next to one of your Top 3."));
+      return;
+    }
+
+    body.appendChild(el("h1", "now-task", state.now.text));
+
+    var digits = el("div", "timer-digits");
+    digits.id = "timer-digits";
+    var bar = el("div", "timer-bar");
+    var fill = el("div");
+    fill.id = "timer-fill";
+    bar.appendChild(fill);
+
+    var controls = el("div", "row");
+    var done = el("button", "btn-primary", "✓ Done — log the win");
+    done.addEventListener("click", function () {
+      var txt = state.now.text;
+      if (state.now.fromTop3 >= 0 && state.top3[state.now.fromTop3] && state.top3[state.now.fromTop3].text === txt) {
+        state.top3[state.now.fromTop3].done = true;
+      }
+      state.now = null;
+      state.timer = null;
+      save();
+      recordWin(txt);
+      renderNow();
+      renderTop3();
+      toast("Win logged. Pick the next thing when you're ready.");
+    });
+    controls.appendChild(done);
+
+    if (state.timer) {
+      digits.textContent = fmt(timerLeft());
+      body.appendChild(digits);
+      body.appendChild(bar);
+      var pause = el("button", null, state.timer.paused ? "Resume" : "Pause");
+      pause.addEventListener("click", function () {
+        if (state.timer.paused) {
+          state.timer.endsAt = Date.now() + state.timer.left * 1000;
+          state.timer.paused = false;
+        } else {
+          state.timer.left = timerLeft();
+          state.timer.paused = true;
+        }
+        save();
+        renderNow();
+      });
+      var stop = el("button", "btn-ghost", "Reset timer");
+      stop.addEventListener("click", function () { state.timer = null; save(); renderNow(); });
+      controls.appendChild(pause);
+      controls.appendChild(stop);
+      tickHandle = setInterval(tick, 500);
+      tick();
+    } else {
+      var t10 = el("button", null, "▶ Just start · 10 min");
+      t10.addEventListener("click", function () { startTimer(10); });
+      var t25 = el("button", null, "▶ Focus · 25 min");
+      t25.addEventListener("click", function () { startTimer(25); });
+      controls.appendChild(t10);
+      controls.appendChild(t25);
+    }
+
+    var park = el("button", "btn-ghost", "Not now → park it");
+    park.addEventListener("click", function () {
+      state.dump.unshift({ text: state.now.text });
+      state.now = null;
+      state.timer = null;
+      save();
+      renderNow();
+      renderDump();
+      toast("Parked in Brain dump. No shame — pick something else.");
+    });
+    controls.appendChild(park);
+    body.appendChild(controls);
+  }
+
+  function setNowFromInput() {
+    var input = $("now-input");
+    var v = (input.value || "").trim();
+    if (!v) { input.focus(); return; }
+    state.now = { text: v, fromTop3: -1 };
+    save();
+    renderNow();
+    pulse($("now-card"));
+  }
+
+  /* ---------- TOP 3 ---------- */
+
+  function renderTop3() {
+    var list = $("top3-list");
+    list.innerHTML = "";
+    for (var i = 0; i < 3; i++) {
+      var li = el("li");
+      if (state.top3[i]) {
+        (function (idx) {
+          var item = state.top3[idx];
+          var row = el("div", "item" + (item.done ? " done" : ""));
+          row.appendChild(el("span", "slot-num", item.done ? "✓" : String(idx + 1)));
+          row.appendChild(el("span", "txt", item.text));
+          if (item.carried && !item.done) row.appendChild(el("span", "carried", "carried"));
+          if (!item.done) {
+            var focus = el("button", "icon-btn", "▶");
+            focus.title = "Focus on this now";
+            focus.setAttribute("aria-label", "Focus on this now");
+            focus.addEventListener("click", function () {
+              state.now = { text: item.text, fromTop3: idx };
+              state.timer = null;
+              save();
+              renderNow();
+              pulse($("now-card"));
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+            var check = el("button", "icon-btn", "✓");
+            check.title = "Mark done";
+            check.setAttribute("aria-label", "Mark done");
+            check.addEventListener("click", function () {
+              item.done = true;
+              if (state.now && state.now.fromTop3 === idx) { state.now = null; state.timer = null; renderNow(); }
+              save();
+              recordWin(item.text);
+              renderTop3();
+            });
+            row.appendChild(focus);
+            row.appendChild(check);
+          } else {
+            var undo = el("button", "icon-btn btn-ghost", "↩");
+            undo.title = "Not done after all";
+            undo.setAttribute("aria-label", "Mark not done");
+            undo.addEventListener("click", function () {
+              item.done = false;
+              for (var w = state.winsToday.length - 1; w >= 0; w--) {
+                if (state.winsToday[w].text === item.text) { state.winsToday.splice(w, 1); break; }
+              }
+              save();
+              renderTop3();
+              renderWins();
+              renderHeader();
+            });
+            row.appendChild(undo);
+          }
+          li.appendChild(row);
+        })(i);
+      } else {
+        (function (idx) {
+          var add = el("button", "empty-slot");
+          add.appendChild(el("span", "slot-num", String(idx + 1)));
+          add.appendChild(el("span", null, "add a priority"));
+          add.addEventListener("click", function () {
+            var v = prompt("Priority #" + (idx + 1) + " — what matters today?");
+            if (v && v.trim()) {
+              state.top3.push({ text: v.trim(), done: false, carried: false });
+              save();
+              renderTop3();
+            }
+          });
+          li.appendChild(add);
+        })(i);
+      }
+      list.appendChild(li);
+    }
+  }
+
+  /* ---------- BRAIN DUMP ---------- */
+
+  function addDump() {
+    var input = $("dump-input");
+    var v = (input.value || "").trim();
+    if (!v) { input.focus(); return; }
+    state.dump.unshift({ text: v });
+    input.value = "";
+    input.focus();
+    save();
+    renderDump();
+  }
+
+  function renderDump() {
+    var list = $("dump-list");
+    list.innerHTML = "";
+    $("dump-empty").style.display = state.dump.length ? "none" : "block";
+    state.dump.forEach(function (item, idx) {
+      var li = el("li");
+      var row = el("div", "item");
+      row.appendChild(el("span", "txt", item.text));
+
+      var up = el("button", "icon-btn", "☆");
+      up.title = "Promote to Top 3";
+      up.setAttribute("aria-label", "Promote to Top 3");
+      if (state.top3.length >= 3) {
+        up.disabled = true;
+        up.title = "Top 3 is full — finish one first";
+      }
+      up.addEventListener("click", function () {
+        if (state.top3.length >= 3) { toast("Top 3 is full. Three is the limit — finish or swap one."); return; }
+        state.top3.push({ text: item.text, done: false, carried: false });
+        state.dump.splice(idx, 1);
+        save();
+        renderDump();
+        renderTop3();
+      });
+
+      var check = el("button", "icon-btn", "✓");
+      check.title = "Done — log as a win";
+      check.setAttribute("aria-label", "Done, log as a win");
+      check.addEventListener("click", function () {
+        state.dump.splice(idx, 1);
+        save();
+        recordWin(item.text);
+        renderDump();
+      });
+
+      var del = el("button", "icon-btn btn-ghost", "✕");
+      del.title = "Delete";
+      del.setAttribute("aria-label", "Delete");
+      del.addEventListener("click", function () {
+        state.dump.splice(idx, 1);
+        save();
+        renderDump();
+      });
+
+      row.appendChild(up);
+      row.appendChild(check);
+      row.appendChild(del);
+      li.appendChild(row);
+      list.appendChild(li);
+    });
+  }
+
+  /* ---------- WINS ---------- */
+
+  function renderWins() {
+    var list = $("wins-list");
+    list.innerHTML = "";
+    $("wins-empty").style.display = state.winsToday.length ? "none" : "block";
+    state.winsToday.forEach(function (w) {
+      var li = el("li");
+      var row = el("div", "item");
+      row.appendChild(el("span", "win-check", "✓"));
+      row.appendChild(el("span", "txt", w.text));
+      row.appendChild(el("span", "when", w.at));
+      li.appendChild(row);
+      list.appendChild(li);
+    });
+  }
+
+  /* ---------- DRAWERS ---------- */
+
+  function renderChecklist(items, bodyId, countId, bucket) {
+    var body = $(bodyId);
+    body.querySelectorAll(".check-row").forEach(function (n) { n.remove(); });
+    var checked = 0;
+    items.forEach(function (item, idx) {
+      var row = el("div", "check-row");
+      var box = el("input");
+      box.type = "checkbox";
+      box.id = bucket + "-" + idx;
+      box.checked = !!state.checks[bucket][idx];
+      if (box.checked) { row.classList.add("checked"); checked++; }
+      box.addEventListener("change", function () {
+        state.checks[bucket][idx] = box.checked;
+        save();
+        renderChecklist(items, bodyId, countId, bucket);
+        if (box.checked) toast("Checked off. That counts as progress.");
+      });
+      var label = el("label");
+      label.setAttribute("for", box.id);
+      label.innerHTML = item.t; // trusted static copy defined above, not user input
+      row.appendChild(box);
+      row.appendChild(label);
+      body.appendChild(row);
+    });
+    $(countId).textContent = checked + "/" + items.length;
+    var warn = $(bucket + "-warn");
+    if (bucket === "money" && !warn) {
+      var p = el("p", "fine-print", "⚠️ Never pay anyone to “recover” unclaimed money — the real searches are free .gov sites. Upfront-fee recovery agents are scams.");
+      p.id = "money-warn";
+      body.appendChild(p);
+    }
+  }
+
+  /* ---------- wire up ---------- */
+
+  $("dump-add").addEventListener("click", addDump);
+  $("dump-input").addEventListener("keydown", function (e) { if (e.key === "Enter") addDump(); });
+  $("win-add").addEventListener("click", function () {
+    var v = prompt("What did you get done?");
+    if (v && v.trim()) {
+      recordWin(v.trim());
+      toast("Win logged.");
+    }
+  });
+
+  var FS_OK = "showSaveFilePicker" in window;
+  var IS_APP = !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+
+  function renderDataButtons() {
+    $("connect-file").hidden = !FS_OK || !!fileHandle;
+    if (fileHandle) $("reconnect-file").hidden = true;
+    renderSetupStrip();
+  }
+
+  $("connect-file").addEventListener("click", connectFile);
+  $("reconnect-file").addEventListener("click", reconnectFile);
+  $("backup-btn").addEventListener("click", downloadBackup);
+  $("restore-btn").addEventListener("click", function () { $("restore-input").click(); });
+  $("restore-input").addEventListener("change", function () {
+    var input = this;
+    var f = input.files && input.files[0];
+    if (!f) return;
+    f.text().then(function (txt) {
+      var data = JSON.parse(txt);
+      if (!data || !Array.isArray(data.top3) || !Array.isArray(data.dump)) throw new Error("bad shape");
+      applyState(data);
+      rolloverIfNeeded();
+      rerenderAll();
+      toast("Backup restored.");
+    }).catch(function () {
+      toast("That file doesn't look like a dashboard backup.");
+    });
+    input.value = "";
+  });
+
+  // ask the browser to protect this site's storage from cleanup
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(function () {});
+  }
+
+  // if localStorage came up empty but the IndexedDB copy exists, recover from it
+  var hadLocal = false;
+  try { hadLocal = !!localStorage.getItem(KEY); } catch (e) {}
+  if (!hadLocal) {
+    idbGet("state").then(function (data) {
+      if (data && typeof data === "object" && (data.updatedAt || 0) > (state.updatedAt || 0)) {
+        applyState(data);
+        rolloverIfNeeded();
+        rerenderAll();
+        toast("Recovered your data from the backup copy.");
+      }
+    }).catch(function () {});
+  }
+
+  // pick up a save file connected on a previous visit
+  if (FS_OK) {
+    idbGet("fileHandle").then(function (h) {
+      if (!h || !h.queryPermission) return;
+      return h.queryPermission({ mode: "readwrite" }).then(function (p) {
+        if (p === "granted") {
+          fileHandle = h;
+          adoptNewer(h);
+          renderDataButtons();
+          updateSaveStatus();
+        } else {
+          $("reconnect-file").hidden = false;
+        }
+      });
+    }).catch(function () {});
+  }
+
+  rerenderAll();
+  renderDataButtons();
+  updateSaveStatus();
+})();
+</script>

@@ -13,6 +13,14 @@ lost-money hunt and getting set up.
 - The main copy runs as a private Claude artifact on claude.ai, so it works on your
   phone too.
 
+## Saving (v2)
+
+Data is kept in three layers: localStorage (instant), an IndexedDB mirror (survives
+more than localStorage), and — optionally, in Chrome/Edge — a real JSON file on disk
+that auto-writes on every change via the File System Access API. Every browser also
+gets one-tap "Download backup" / "Restore from backup". The in-app "Make it a desktop
+app" drawer has per-browser steps for installing the page as a windowed app.
+
 ## Why is this inside the airllm fork?
 
 This fork was the only repo Claude's cloud session could reach, so the dashboard code

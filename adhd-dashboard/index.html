@@ -405,6 +405,34 @@
     <div class="drawer-body" id="setup-body"></div>
   </details>
 
+  <!-- DESKTOP APP -->
+  <details class="card">
+    <summary><span class="chev">▸</span> 📌 Make it a desktop app</summary>
+    <div class="drawer-body">
+      <p style="margin:0;"><b>Chrome:</b> ⋮ menu → <b>“Install page as app”</b> (on some versions it's under “Cast, save, and share”, or “Save and share → Create shortcut” with “Open as window” ticked).</p>
+      <p style="margin:0;"><b>Edge:</b> ⋯ menu → <b>Apps</b> → <b>“Install this site as an app”</b>.</p>
+      <p style="margin:0;"><b>Safari (Mac):</b> File menu → <b>“Add to Dock…”</b>.</p>
+      <p style="margin:0;"><b>Phone:</b> Share button → <b>“Add to Home Screen”</b>.</p>
+      <p class="fine-print">You get a real icon that opens the dashboard in its own window — no tabs to lose. Updates Claude ships arrive automatically the next time you open it.</p>
+    </div>
+  </details>
+
+  <!-- DATA -->
+  <details class="card" id="data-drawer">
+    <summary><span class="chev">▸</span> 💾 Hard saves &amp; backups <span class="count" id="data-status-chip">browser</span></summary>
+    <div class="drawer-body">
+      <p style="margin:0;" id="data-status-line">Saving automatically in this browser.</p>
+      <div class="row">
+        <button id="connect-file" hidden>Connect a save file</button>
+        <button id="reconnect-file" hidden>Reconnect save file</button>
+        <button id="backup-btn">Download backup</button>
+        <button class="btn-ghost" id="restore-btn">Restore from backup</button>
+      </div>
+      <p class="fine-print">“Connect a save file” (Chrome/Edge) writes every change to a real file on your computer — pick a spot once, like Documents, and it saves silently from then on. “Download backup” works in every browser; the file is tiny, grab one whenever.</p>
+      <input type="file" id="restore-input" accept=".json,application/json" hidden />
+    </div>
+  </details>
+
   <!-- HOW IT WORKS -->
   <details class="card">
     <summary><span class="chev">▸</span> 🧭 How this works</summary>
@@ -418,7 +446,7 @@
     </div>
   </details>
 
-  <footer>Private to you · saves automatically in this browser · built by Claude — ask for changes anytime</footer>
+  <footer>Private to you · <span id="save-status">saves automatically</span> · v2 · built by Claude — ask for changes anytime</footer>
 </main>
 
 <div id="toast" role="status" aria-live="polite"></div>
@@ -466,7 +494,8 @@
       dump: [],             // [{ text }]
       winsToday: [],        // [{ text, at: "3:42 PM" }]
       winsTotal: 0,
-      checks: { money: {}, setup: {} }
+      checks: { money: {}, setup: {} },
+      updatedAt: 0
     };
   }
 
@@ -480,7 +509,8 @@
   } catch (e) { /* start fresh if storage is unreadable */ }
 
   // day rollover: carry unfinished priorities, bank the wins, clear focus
-  if (state.date !== todayStr()) {
+  function rolloverIfNeeded() {
+    if (state.date === todayStr()) return;
     state.winsTotal += state.winsToday.length;
     state.winsToday = [];
     state.top3 = state.top3.filter(function (t) { return !t.done; });
@@ -495,9 +525,150 @@
         : "Fresh day. What are today's top 3?");
     }, 400);
   }
+  rolloverIfNeeded();
+
+  /* ---------- saving: three layers ----------
+     1. localStorage  — instant, every change
+     2. IndexedDB     — second browser copy, harder to lose
+     3. a real file   — optional, Chrome/Edge, auto-written on every change */
+
+  var fileHandle = null;
+  var mirrorTimer = null;
 
   function save() {
+    state.updatedAt = Date.now();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage full/blocked */ }
+    clearTimeout(mirrorTimer);
+    mirrorTimer = setTimeout(mirror, 800);
+    updateSaveStatus();
+  }
+
+  function idb() {
+    return new Promise(function (res, rej) {
+      var rq = indexedDB.open("adhd_dash", 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore("kv"); };
+      rq.onsuccess = function () { res(rq.result); };
+      rq.onerror = function () { rej(rq.error); };
+    });
+  }
+  function idbSet(k, v) {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("kv", "readwrite");
+        tx.objectStore("kv").put(v, k);
+        tx.oncomplete = res;
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbGet(k) {
+    return idb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var rq = db.transaction("kv").objectStore("kv").get(k);
+        rq.onsuccess = function () { res(rq.result); };
+        rq.onerror = function () { rej(rq.error); };
+      });
+    });
+  }
+
+  function mirror() {
+    try { idbSet("state", JSON.parse(JSON.stringify(state))).catch(function () {}); } catch (e) {}
+    if (fileHandle) writeToFile();
+  }
+
+  function writeToFile() {
+    fileHandle.createWritable().then(function (w) {
+      return w.write(JSON.stringify(state, null, 2)).then(function () { return w.close(); });
+    }).then(function () { updateSaveStatus(); }).catch(function () { /* browser copies still hold it */ });
+  }
+
+  function connectFile() {
+    window.showSaveFilePicker({
+      suggestedName: "adhd-dashboard-data.json",
+      types: [{ description: "Dashboard data", accept: { "application/json": [".json"] } }]
+    }).then(function (h) {
+      fileHandle = h;
+      idbSet("fileHandle", h).catch(function () {});
+      writeToFile();
+      renderDataButtons();
+      updateSaveStatus();
+      toast("Connected. Every change now auto-saves to that file.");
+    }).catch(function (e) {
+      if (e && e.name === "AbortError") return;
+      toast("File picker was blocked here — Download backup works everywhere.");
+    });
+  }
+
+  function reconnectFile() {
+    idbGet("fileHandle").then(function (h) {
+      if (!h) return;
+      return h.requestPermission({ mode: "readwrite" }).then(function (p) {
+        if (p !== "granted") return;
+        fileHandle = h;
+        return adoptNewer(h).then(function () {
+          renderDataButtons();
+          updateSaveStatus();
+          toast("Save file reconnected.");
+        });
+      });
+    }).catch(function () {});
+  }
+
+  function adoptNewer(h) {
+    return h.getFile().then(function (f) { return f.text(); }).then(function (txt) {
+      var data = JSON.parse(txt);
+      if (data && typeof data === "object" && (data.updatedAt || 0) > (state.updatedAt || 0)) {
+        applyState(data);
+        rolloverIfNeeded();
+        rerenderAll();
+        toast("Loaded your latest data from the save file.");
+      }
+    }).catch(function () {});
+  }
+
+  function applyState(saved) {
+    var base = freshState();
+    for (var k in base) { if (Object.prototype.hasOwnProperty.call(saved, k)) base[k] = saved[k]; }
+    state = base;
+    save();
+  }
+
+  function downloadBackup() {
+    var d = new Date();
+    var name = "adhd-dashboard-backup-" + d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + ".json";
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    toast("Backup downloaded. Tiny file, big safety.");
+  }
+
+  function updateSaveStatus() {
+    var where = fileHandle ? "file + browser" : "browser";
+    var line = $("save-status");
+    if (line) line.textContent = "saved ✓ " + timeNow() + " (" + where + ")";
+    var chip = $("data-status-chip");
+    if (chip) chip.textContent = where;
+    var dl = $("data-status-line");
+    if (dl) dl.textContent = fileHandle
+      ? "Auto-saving to your file and this browser. Belt and suspenders."
+      : "Saving automatically in this browser. Connect a file for a hard copy on disk.";
+  }
+
+  function rerenderAll() {
+    renderHeader();
+    renderNow();
+    renderTop3();
+    renderDump();
+    renderWins();
+    renderChecklist(MONEY, "money-body", "money-count", "money");
+    renderChecklist(SETUP, "setup-body", "setup-count", "setup");
   }
 
   /* ---------- helpers ---------- */
@@ -922,12 +1093,72 @@
     }
   });
 
-  renderHeader();
-  renderNow();
-  renderTop3();
-  renderDump();
-  renderWins();
-  renderChecklist(MONEY, "money-body", "money-count", "money");
-  renderChecklist(SETUP, "setup-body", "setup-count", "setup");
+  var FS_OK = "showSaveFilePicker" in window;
+
+  function renderDataButtons() {
+    $("connect-file").hidden = !FS_OK || !!fileHandle;
+    if (fileHandle) $("reconnect-file").hidden = true;
+  }
+
+  $("connect-file").addEventListener("click", connectFile);
+  $("reconnect-file").addEventListener("click", reconnectFile);
+  $("backup-btn").addEventListener("click", downloadBackup);
+  $("restore-btn").addEventListener("click", function () { $("restore-input").click(); });
+  $("restore-input").addEventListener("change", function () {
+    var input = this;
+    var f = input.files && input.files[0];
+    if (!f) return;
+    f.text().then(function (txt) {
+      var data = JSON.parse(txt);
+      if (!data || !Array.isArray(data.top3) || !Array.isArray(data.dump)) throw new Error("bad shape");
+      applyState(data);
+      rolloverIfNeeded();
+      rerenderAll();
+      toast("Backup restored.");
+    }).catch(function () {
+      toast("That file doesn't look like a dashboard backup.");
+    });
+    input.value = "";
+  });
+
+  // ask the browser to protect this site's storage from cleanup
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(function () {});
+  }
+
+  // if localStorage came up empty but the IndexedDB copy exists, recover from it
+  var hadLocal = false;
+  try { hadLocal = !!localStorage.getItem(KEY); } catch (e) {}
+  if (!hadLocal) {
+    idbGet("state").then(function (data) {
+      if (data && typeof data === "object" && (data.updatedAt || 0) > (state.updatedAt || 0)) {
+        applyState(data);
+        rolloverIfNeeded();
+        rerenderAll();
+        toast("Recovered your data from the backup copy.");
+      }
+    }).catch(function () {});
+  }
+
+  // pick up a save file connected on a previous visit
+  if (FS_OK) {
+    idbGet("fileHandle").then(function (h) {
+      if (!h || !h.queryPermission) return;
+      return h.queryPermission({ mode: "readwrite" }).then(function (p) {
+        if (p === "granted") {
+          fileHandle = h;
+          adoptNewer(h);
+          renderDataButtons();
+          updateSaveStatus();
+        } else {
+          $("reconnect-file").hidden = false;
+        }
+      });
+    }).catch(function () {});
+  }
+
+  rerenderAll();
+  renderDataButtons();
+  updateSaveStatus();
 })();
 </script>

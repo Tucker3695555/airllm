@@ -358,6 +358,13 @@
     <div class="tally" id="tally"><b>0</b> wins all-time</div>
   </header>
 
+  <!-- FIRST-TIME SETUP STRIP (auto-hides once done) -->
+  <section class="card" id="setup-strip" hidden>
+    <p class="zone-label">First-time setup — this box disappears when it's done</p>
+    <div class="row" id="strip-actions"></div>
+    <p class="hint" id="strip-desktop"></p>
+  </section>
+
   <!-- RIGHT NOW -->
   <section class="card" id="now-card" aria-labelledby="now-label">
     <p class="zone-label" id="now-label">Right now — one thing only</p>
@@ -495,6 +502,7 @@
       winsToday: [],        // [{ text, at: "3:42 PM" }]
       winsTotal: 0,
       checks: { money: {}, setup: {} },
+      stripDismissed: false,
       updatedAt: 0
     };
   }
@@ -669,6 +677,41 @@
     renderWins();
     renderChecklist(MONEY, "money-body", "money-count", "money");
     renderChecklist(SETUP, "setup-body", "setup-count", "setup");
+    renderSetupStrip();
+  }
+
+  function browserTip() {
+    var ua = navigator.userAgent;
+    if (/Edg\//.test(ua)) return "Edge: ⋯ menu → Apps → “Install this site as an app”.";
+    if (/Chrome/.test(ua)) return "Chrome: ⋮ menu (top-right) → “Install page as app” (on some versions: “Save and share → Create shortcut”, tick “Open as window”).";
+    if (/Safari/.test(ua)) return "Safari: File menu → “Add to Dock…” (on iPhone: Share → “Add to Home Screen”).";
+    return "Open the 📌 drawer below for install steps.";
+  }
+
+  function renderSetupStrip() {
+    var strip = $("setup-strip");
+    if (!strip) return;
+    var needSaves = FS_OK && !fileHandle;
+    var needDesktop = !IS_APP;
+    if (state.stripDismissed || (!needSaves && !needDesktop)) { strip.hidden = true; return; }
+    strip.hidden = false;
+    var actions = $("strip-actions");
+    actions.innerHTML = "";
+    if (needSaves) {
+      var b = el("button", "btn-primary", "💾 Turn on hard saves — one tap");
+      b.addEventListener("click", connectFile);
+      actions.appendChild(b);
+    }
+    var x = el("button", "btn-ghost", "✕ hide this");
+    x.addEventListener("click", function () {
+      state.stripDismissed = true;
+      save();
+      renderSetupStrip();
+    });
+    actions.appendChild(x);
+    $("strip-desktop").textContent = needDesktop
+      ? "📌 To make this a desktop app — " + browserTip()
+      : "";
   }
 
   /* ---------- helpers ---------- */
@@ -1094,10 +1137,12 @@
   });
 
   var FS_OK = "showSaveFilePicker" in window;
+  var IS_APP = !!(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
 
   function renderDataButtons() {
     $("connect-file").hidden = !FS_OK || !!fileHandle;
     if (fileHandle) $("reconnect-file").hidden = true;
+    renderSetupStrip();
   }
 
   $("connect-file").addEventListener("click", connectFile);

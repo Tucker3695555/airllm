@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: go-pulse
+    metrics_path: /debug/metrics/prometheus
+    static_configs:
+      - targets: ["execution:6060"]
+
+  - job_name: lighthouse-beacon
+    static_configs:
+      - targets: ["consensus:5054"]
+
+  # Scrape errors here are expected while the validator profile is disabled.
+  - job_name: lighthouse-validator
+    static_configs:
+      - targets: ["validator:5064"]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

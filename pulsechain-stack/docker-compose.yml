@@ -1,0 +1,165 @@
+name: pulsechain
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "5"
+
+services:
+  # ---------------------------------------------------------------------------
+  # Execution client — go-pulse (PulseChain fork of geth)
+  # ---------------------------------------------------------------------------
+  execution:
+    image: ${EL_IMAGE:-registry.gitlab.com/pulsechaincom/go-pulse:latest}
+    container_name: pulse-execution
+    restart: unless-stopped
+    stop_grace_period: 3m
+    logging: *default-logging
+    command:
+      - ${EL_NETWORK_FLAG:---pulsechain}
+      - --datadir=/data
+      - --port=30303
+      - --maxpeers=${EL_MAX_PEERS:-50}
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.vhosts=*
+      - --http.corsdomain=${HTTP_CORS:-*}
+      - --http.api=${HTTP_APIS:-eth,net,web3,txpool}
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.origins=${WS_ORIGINS:-*}
+      - --ws.api=${WS_APIS:-eth,net,web3}
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port=8551
+      - --authrpc.vhosts=*
+      - --authrpc.jwtsecret=/jwt/jwt.hex
+      - --metrics
+      - --metrics.addr=0.0.0.0
+      - --metrics.port=6060
+    ports:
+      - "30303:30303/tcp"                          # P2P
+      - "30303:30303/udp"                          # P2P discovery
+      - "${RPC_BIND_ADDR:-127.0.0.1}:8545:8545"    # JSON-RPC (HTTP)
+      - "${RPC_BIND_ADDR:-127.0.0.1}:8546:8546"    # JSON-RPC (WebSocket)
+    volumes:
+      - ./data/execution:/data
+      - ./jwt:/jwt:ro
+
+  # ---------------------------------------------------------------------------
+  # Consensus client — lighthouse-pulse beacon node
+  # ---------------------------------------------------------------------------
+  consensus:
+    image: ${CL_IMAGE:-registry.gitlab.com/pulsechaincom/lighthouse-pulse:latest}
+    container_name: pulse-consensus
+    restart: unless-stopped
+    stop_grace_period: 1m
+    logging: *default-logging
+    depends_on:
+      - execution
+    command:
+      - lighthouse
+      - bn
+      - --network=${CL_NETWORK:-pulsechain}
+      - --datadir=/data
+      - --port=9000
+      - --execution-endpoint=http://execution:8551
+      - --execution-jwt=/jwt/jwt.hex
+      - --checkpoint-sync-url=${CHECKPOINT_URL:-https://checkpoint.pulsechain.com}
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=5052
+      - --metrics
+      - --metrics-address=0.0.0.0
+      - --metrics-port=5054
+    ports:
+      - "9000:9000/tcp"                            # P2P
+      - "9000:9000/udp"                            # P2P discovery
+      - "${RPC_BIND_ADDR:-127.0.0.1}:5052:5052"    # Beacon API
+    volumes:
+      - ./data/consensus:/data
+      - ./jwt:/jwt:ro
+
+  # ---------------------------------------------------------------------------
+  # Validator client — lighthouse-pulse (profile: validator)
+  # Requires FEE_RECIPIENT in .env and imported keys (scripts/import-keys.sh).
+  # ---------------------------------------------------------------------------
+  validator:
+    image: ${CL_IMAGE:-registry.gitlab.com/pulsechaincom/lighthouse-pulse:latest}
+    container_name: pulse-validator
+    restart: unless-stopped
+    logging: *default-logging
+    profiles: ["validator"]
+    depends_on:
+      - consensus
+    command:
+      - lighthouse
+      - vc
+      - --network=${CL_NETWORK:-pulsechain}
+      - --datadir=/data
+      - --beacon-nodes=http://consensus:5052
+      - --suggested-fee-recipient=${FEE_RECIPIENT:-}
+      - --graffiti=${GRAFFITI:-}
+      - --enable-doppelganger-protection
+      - --metrics
+      - --metrics-address=0.0.0.0
+      - --metrics-port=5064
+    volumes:
+      - ./data/validator:/data
+
+  # ---------------------------------------------------------------------------
+  # Public RPC edge — nginx reverse proxy with rate limiting (profile: rpc)
+  # ---------------------------------------------------------------------------
+  rpc-proxy:
+    image: nginx:1.27-alpine
+    container_name: pulse-rpc-proxy
+    restart: unless-stopped
+    logging: *default-logging
+    profiles: ["rpc"]
+    depends_on:
+      - execution
+    ports:
+      - "${RPC_PROXY_HTTP_PORT:-8080}:80"
+      # - "443:443"   # enable after provisioning TLS certs — see rpc/README.md
+    volumes:
+      - ./rpc/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./rpc/certs:/etc/nginx/certs:ro
+
+  # ---------------------------------------------------------------------------
+  # Monitoring — Prometheus + Grafana (profile: monitoring)
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pulse-prometheus
+    restart: unless-stopped
+    logging: *default-logging
+    profiles: ["monitoring"]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./data/prometheus:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pulse-grafana
+    restart: unless-stopped
+    logging: *default-logging
+    profiles: ["monitoring"]
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-changeme}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "${GRAFANA_BIND_ADDR:-127.0.0.1}:3000:3000"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro

@@ -1,0 +1,11 @@
+# Secrets & local config — never commit
+.env
+jwt/
+keys/
+rpc/certs/
+
+# Chain data & runtime state
+data/
+
+# staking-deposit-cli checkout (created by scripts/generate-keys.sh)
+staking-deposit-cli/
